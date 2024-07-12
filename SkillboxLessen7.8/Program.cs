@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using static System.Console;
 using File = System.IO.File;
 
@@ -99,7 +100,7 @@ namespace SkillboxLessen7._8
                         break;
                     case 5:
                         Clear();
-                        if (repository.ChooseSortingMethod(inputText, out int sortValue)) { }
+                        if (repository.ChooseSortingMethod(out int sortValue)) { }
                         else
                         {
                             continue;
@@ -126,7 +127,130 @@ namespace SkillboxLessen7._8
                         }
                         break;
                     case 6:
-                        repository.CompletionFilterDateSort();
+                        int _chooseNumberFilter = 1;
+                        bool _isForwardFilter=true;
+                        bool _isdataSuccessfullyCompleted=false;
+                        workers = repository.GetAllWorkers();
+                        bool isDataEntry = true;
+                        while (isDataEntry)
+                        {
+                            Clear();
+                            WriteLine("Введите новую сортеровку ");
+                            WriteLine("\n1)По возростанию\n2)По убыванию ");
+                            Write("Ваш выбор :");
+                            if (int.TryParse(ReadLine(), out int numberSort))
+                            {
+                                if (numberSort > 0 && numberSort < 3)
+                                    _isForwardFilter = numberSort == 1;
+                                else
+                                {
+                                    WriteLine("Ошибка нет ");
+                                    ReadLine();
+                                    Clear();
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                WriteLine("Ошибка нет ");
+                                ReadLine();
+                                Clear();
+                                continue;
+                            }
+                            WriteLine("По какому критерию сортировать ");
+                            WriteLine("\n1)По Id \n2)По дате создания\n3)По имени\n4)по возросту\n" +
+                                "5)По росту\n6)По дате рождения\n7)По месту рождения ");
+                            Write("Ваш выбор :");
+                            if (int.TryParse(ReadLine(), out int numberChooseSort))
+                            {
+                                if (numberChooseSort > 0 && numberChooseSort < 8)
+                                {
+                                    _chooseNumberFilter = numberChooseSort;
+                                }
+                                else
+                                {
+                                    WriteLine("Ошибка нет ");
+                                    ReadLine();
+                                    Clear();
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                WriteLine("Ошибка нет ");
+                                ReadLine();
+                                Clear();
+                                continue;
+                            }
+                            Write("\nФильтр сортировки установлен");
+                            isDataEntry = false;
+                            _isdataSuccessfullyCompleted = true;
+                        }
+                        if (_isdataSuccessfullyCompleted)
+                        {
+                            if (_isForwardFilter)
+                            {
+                                if (_chooseNumberFilter == 1)
+                                {
+                                    workers = workers.OrderBy(worker => worker.Id).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 2)
+                                {
+                                    workers = workers.OrderBy(worker => worker.DateAndTimeCreate).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 3)
+                                {
+                                    workers = workers.OrderBy(worker => worker.FullName).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 4)
+                                {
+                                     workers = workers.OrderBy(worker => worker.Age).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 5)
+                                {
+                                     workers = workers.OrderBy(worker => worker.Height).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 6)
+                                {
+                                    workers =  workers.OrderBy(worker => worker.DateOfBirth).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 7)
+                                {
+                                    workers =  workers.OrderBy(worker => worker.PlaceOfBirth).ToArray();
+                                }
+                            }
+                            else
+                            {
+                                if (_chooseNumberFilter == 1)
+                                {
+                                    workers = workers.OrderByDescending(worker => worker.Id).Select(worker => worker).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 2)
+                                {
+                                    workers = workers.OrderByDescending(worker => worker.DateAndTimeCreate).Select(worker => worker).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 3)
+                                {
+                                    workers = workers.OrderByDescending(worker => worker.FullName).Select(worker => worker).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 4)
+                                {
+                                    workers = workers.OrderByDescending(worker => worker.Age).Select(worker => worker).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 5)
+                                {
+                                    workers = workers.OrderByDescending(worker => worker.Height).Select(worker => worker).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 6)
+                                {
+                                    workers = workers.OrderByDescending(worker => worker.DateOfBirth).Select(worker => worker).ToArray();
+                                }
+                                else if (_chooseNumberFilter == 7)
+                                {
+                                    workers = workers.OrderByDescending(worker => worker.PlaceOfBirth).Select(worker => worker).ToArray();
+                                }
+                            }
+                        }
                         break;
                     default:
                         WriteLine("Данные не корректы");
@@ -168,8 +292,6 @@ namespace SkillboxLessen7._8
         {
             private string _pathFile = @"PersonalAffairsForEmployees.txt";
             private List<Worker> _workers = new List<Worker>();
-            private int _chooseNumberFilter;
-            bool _isForwardFilter;
 
             public Repository()
             {
@@ -184,8 +306,6 @@ namespace SkillboxLessen7._8
                     File.Create(_pathFile).Close();
                 }
                 WriteLine($"\n");
-                _chooseNumberFilter = 1;
-                _isForwardFilter = true;
             }
 
             public Worker[] GetAllWorkers()
@@ -194,137 +314,7 @@ namespace SkillboxLessen7._8
                 return _workers.ToArray();
             }
 
-            public void CompletionFilterDateSort()
-            {
-                bool isDataEntry = true;
-                while (isDataEntry)
-                {
-                    Clear();
-                    WriteLine("Введите новую сортеровку ");
-                    WriteLine("\n1)По возростанию\n2)По убыванию ");
-                    Write("Ваш выбор :");
-                    if (int.TryParse(ReadLine(), out int numberSort))
-                    {
-                        if (numberSort > 0 && numberSort < 3)
-                            _isForwardFilter = numberSort == 1 ? true : false;
-                        else
-                        {
-                            WriteLine("Ошибка нет ");
-                            ReadLine();
-                            Clear();
-                            isDataEntry = EndingDataCompletion();
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        WriteLine("Ошибка нет ");
-                        ReadLine();
-                        Clear();
-                        isDataEntry = EndingDataCompletion();
-                        continue;
-                    }
-
-                    WriteLine("По какому критерию сортировать ");
-                    WriteLine("\n1)По Id \n2)По дате создания\n3)По имени\n4)по возросту\n" +
-                        "5)По росту\n6)По дате рождения\n7)По месту рождения ");
-                    Write("Ваш выбор :");
-                    if (int.TryParse(ReadLine(), out int numberChooseSort))
-                    {
-                        if (numberChooseSort > 0 && numberChooseSort < 8)
-                        {
-                            _chooseNumberFilter = numberChooseSort;
-                        }
-                        else
-                        {
-                            WriteLine("Ошибка нет ");
-                            ReadLine();
-                            Clear();
-                            isDataEntry = EndingDataCompletion();
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        WriteLine("Ошибка нет ");
-                        ReadLine();
-                        Clear();
-                        isDataEntry = EndingDataCompletion();
-                        continue;
-                    }
-                    Write("\nФильтр сортировки установлен");
-                    isDataEntry = false;
-                }
-                ActiveNewSort(_chooseNumberFilter, _isForwardFilter);
-            }
-
-            private void ActiveNewSort(int chooseFilter, bool isForwardFilter)
-            {
-                if (isForwardFilter)
-                {
-                    if (chooseFilter == 1)
-                    {
-                        _workers = _workers.OrderBy(worker => worker.Id).ToList();
-                    }
-                    else if (chooseFilter == 2)
-                    {
-                        _workers = _workers.OrderBy(worker => worker.DateAndTimeCreate).ToList();
-                    }
-                    else if (chooseFilter == 3)
-                    {
-                        _workers = _workers.OrderBy(worker => worker.FullName).ToList();
-                    }
-                    else if (chooseFilter == 4)
-                    {
-                        _workers = _workers.OrderBy(worker => worker.Age).ToList();
-                    }
-                    else if (chooseFilter == 5)
-                    {
-                        _workers = _workers.OrderBy(worker => worker.Height).ToList();
-                    }
-                    else if (chooseFilter == 6)
-                    {
-                        _workers = _workers.OrderBy(worker => worker.DateOfBirth).ToList();
-                    }
-                    else if (chooseFilter == 7)
-                    {
-                        _workers = _workers.OrderBy(worker => worker.PlaceOfBirth).ToList();
-                    }
-                }
-                else
-                {
-                    if (chooseFilter == 1)
-                    {
-                        _workers = _workers.OrderByDescending(worker => worker.Id).Select(worker => worker).ToList();
-                    }
-                    else if (chooseFilter == 2)
-                    {
-                        _workers = _workers.OrderByDescending(worker => worker.DateAndTimeCreate).Select(worker => worker).ToList();
-                    }
-                    else if (chooseFilter == 3)
-                    {
-                        _workers = _workers.OrderByDescending(worker => worker.FullName).Select(worker => worker).ToList();
-                    }
-                    else if (chooseFilter == 4)
-                    {
-                        _workers = _workers.OrderByDescending(worker => worker.Age).Select(worker => worker).ToList();
-                    }
-                    else if (chooseFilter == 5)
-                    {
-                        _workers = _workers.OrderByDescending(worker => worker.Height).Select(worker => worker).ToList();
-                    }
-                    else if (chooseFilter == 6)
-                    {
-                        _workers = _workers.OrderByDescending(worker => worker.DateOfBirth).Select(worker => worker).ToList();
-                    }
-                    else if (chooseFilter == 7)
-                    {
-                        _workers = _workers.OrderByDescending(worker => worker.PlaceOfBirth).Select(worker => worker).ToList();
-                    }
-                }
-            }
-
-            public bool ChooseSortingMethod(string inputText, out int sortValue)
+            public bool ChooseSortingMethod(out int sortValue)
             {
                 bool isDataEntry = true;
                 sortValue = 0;
@@ -334,7 +324,7 @@ namespace SkillboxLessen7._8
                     WriteLine("1) Create - дате создания");
                     WriteLine("2) Birth - дате рождения");
                     Write("Введите желаемую сортеровку :");
-                    inputText = ReadLine();
+                   string inputText = ReadLine();
                     WriteLine("\n");
                     if (int.TryParse(inputText, out int inputSortValue))
                     {
@@ -512,7 +502,6 @@ namespace SkillboxLessen7._8
                     WriteLine(new string('_', 48) + "\n");
                     worker.ShowInfo();
                     WriteLine(new string('_', 48) + "\n");
-                    ActiveNewSort(_chooseNumberFilter, _isForwardFilter);
                 }
             }
 
@@ -591,7 +580,6 @@ namespace SkillboxLessen7._8
                 }
                 var filtersWorker = from work in _workers orderby work.Id select work;
                 _workers = filtersWorker.ToList();
-                ActiveNewSort(_chooseNumberFilter, _isForwardFilter);
             }
 
             private Worker ContentDateRead(string[] employeeData)
@@ -614,60 +602,38 @@ namespace SkillboxLessen7._8
             private Worker ContentVerification(string[] employeeData)
             {
                 bool isNotError = true;
-                int _id;
-                DateTime _dateAndTimeCreate;
-                string _fullName;
-                int _age;
-                double _height;
-                DateTime _dateOfBirth;
-                string _placeOfBirth;
-                if (int.TryParse(employeeData[0], out int id))
-                {
-                    _id = id;
-                }
+                if (int.TryParse(employeeData[0], out int id)){}
                 else
                 {
                     isNotError = false;
                     WriteLine("При чтении допущена ошибка в блоке ID Не верный");
                 }
-                if (DateTime.TryParse(employeeData[1], out DateTime dateAndTimeCreate))
-                {
-                    _dateAndTimeCreate = dateAndTimeCreate;
-                }
+                if (DateTime.TryParse(employeeData[1], out DateTime dateAndTimeCreate)){}
                 else
                 {
                     isNotError = false;
                     WriteLine("При чтении допущена ошибка в блоке время добовления записи");
                 }
-                _fullName = employeeData[2];
-                if (int.TryParse(employeeData[3], out int age))
-                {
-                    _age = age;
-                }
+               string _fullName = employeeData[2];
+                if (int.TryParse(employeeData[3], out int age)){}
                 else
                 {
                     isNotError = false;
                     WriteLine("При чтении допущена ошибка в блоке Возраст");
                 }
-                if (double.TryParse(employeeData[4], out double height))
-                {
-                    _height = height;
-                }
+                if (double.TryParse(employeeData[4], out double height)){}
                 else
                 {
                     isNotError = false;
                     WriteLine("При чтении допущена ошибка в блоке Рост");
                 }
-                if (DateTime.TryParse(employeeData[5], out DateTime dateOfBirth))
-                {
-                    _dateOfBirth = dateOfBirth;
-                }
+                if (DateTime.TryParse(employeeData[5], out DateTime dateOfBirth)){}
                 else
                 {
                     isNotError = false;
                     WriteLine("При чтении допущена ошибка в блоке день рождения");
                 }
-                _placeOfBirth = employeeData[6];
+               string _placeOfBirth = employeeData[6];
                 if (isNotError)
                 {
                     return new Worker(dateAndTimeCreate, _fullName, age, height, dateOfBirth, _placeOfBirth);
