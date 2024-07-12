@@ -20,7 +20,8 @@ namespace SkillboxLessen7._8
             {
                 WriteLine("Добрый день выберите один из следующих пунктов :\n");
                 WriteLine("1)Просмотр всех записей.\n2)Просмотр одной записи по индексу\n" +
-                    "3)Создание записи.\n4)Удаление записи.\n5)Загрузка записей в выбранном диапазоне дат.\n");
+                    "3)Создание записи.\n4)Удаление записи.\n5)Загрузка записей в выбранном диапазоне дат.\n" +
+                    "6)Выберите сортировку");
                 Write("Введите номер желаемого пункта ");
                 inputText = ReadLine();
                 WriteLine("\n");
@@ -124,6 +125,9 @@ namespace SkillboxLessen7._8
                             }
                         }
                         break;
+                    case 6:
+                        repository.CompletionFilterDateSort();
+                        break;
                     default:
                         WriteLine("Данные не корректы");
                         break;
@@ -163,7 +167,9 @@ namespace SkillboxLessen7._8
         class Repository
         {
             private string _pathFile = @"PersonalAffairsForEmployees.txt";
-            List<Worker> workers = new List<Worker>();
+            private List<Worker> _workers = new List<Worker>();
+            private int _chooseNumberFilter;
+            bool _isForwardFilter;
 
             public Repository()
             {
@@ -178,12 +184,144 @@ namespace SkillboxLessen7._8
                     File.Create(_pathFile).Close();
                 }
                 WriteLine($"\n");
+                _chooseNumberFilter = 1;
+                _isForwardFilter = true;
             }
 
             public Worker[] GetAllWorkers()
             {
                 SaveWorkersDate();
-                return workers.ToArray();
+                return _workers.ToArray();
+            }
+
+            public void CompletionFilterDateSort()
+            {
+                bool isDataEntry = true;
+                while (isDataEntry)
+                {
+                    Clear();
+                    WriteLine("Введите новую сортеровку ");
+                    WriteLine("\n1)По возростанию\n2)По убыванию ");
+                    Write("Ваш выбор :");
+                    if (int.TryParse(ReadLine(), out int numberSort))
+                    {
+                        if (numberSort > 0 && numberSort < 3)
+                            _isForwardFilter = numberSort == 1 ? true : false;
+                        else
+                        {
+                            WriteLine("Ошибка нет ");
+                            ReadLine();
+                            Clear();
+                            isDataEntry = EndingDataCompletion();
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        WriteLine("Ошибка нет ");
+                        ReadLine();
+                        Clear();
+                        isDataEntry = EndingDataCompletion();
+                        continue;
+                    }
+
+                    WriteLine("По какому критерию сортировать ");
+                    WriteLine("\n1)По Id \n2)По дате создания\n3)По имени\n4)по возросту\n" +
+                        "5)По росту\n6)По дате рождения\n7)По месту рождения ");
+                    Write("Ваш выбор :");
+                    if (int.TryParse(ReadLine(), out int numberChooseSort))
+                    {
+                        if (numberChooseSort > 0 && numberChooseSort < 8)
+                        {
+                            _chooseNumberFilter = numberChooseSort;
+                        }
+                        else
+                        {
+                            WriteLine("Ошибка нет ");
+                            ReadLine();
+                            Clear();
+                            isDataEntry = EndingDataCompletion();
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        WriteLine("Ошибка нет ");
+                        ReadLine();
+                        Clear();
+                        isDataEntry = EndingDataCompletion();
+                        continue;
+                    }
+                    Write("\nФильтр сортировки установлен");
+                    isDataEntry = false;
+                }
+                ActiveNewSort(_chooseNumberFilter, _isForwardFilter);
+            }
+
+            private void ActiveNewSort(int chooseFilter, bool isForwardFilter)
+            {
+                if (isForwardFilter)
+                {
+                    if (chooseFilter == 1)
+                    {
+                        _workers = _workers.OrderBy(worker => worker.Id).ToList();
+                    }
+                    else if (chooseFilter == 2)
+                    {
+                        _workers = _workers.OrderBy(worker => worker.DateAndTimeCreate).ToList();
+                    }
+                    else if (chooseFilter == 3)
+                    {
+                        _workers = _workers.OrderBy(worker => worker.FullName).ToList();
+                    }
+                    else if (chooseFilter == 4)
+                    {
+                        _workers = _workers.OrderBy(worker => worker.Age).ToList();
+                    }
+                    else if (chooseFilter == 5)
+                    {
+                        _workers = _workers.OrderBy(worker => worker.Height).ToList();
+                    }
+                    else if (chooseFilter == 6)
+                    {
+                        _workers = _workers.OrderBy(worker => worker.DateOfBirth).ToList();
+                    }
+                    else if (chooseFilter == 7)
+                    {
+                        _workers = _workers.OrderBy(worker => worker.PlaceOfBirth).ToList();
+                    }
+                }
+                else
+                {
+                    if (chooseFilter == 1)
+                    {
+                        _workers = _workers.OrderByDescending(worker => worker.Id).Select(worker => worker).ToList();
+                    }
+                    else if (chooseFilter == 2)
+                    {
+                        _workers = _workers.OrderByDescending(worker => worker.DateAndTimeCreate).Select(worker => worker).ToList();
+                    }
+                    else if (chooseFilter == 3)
+                    {
+                        _workers = _workers.OrderByDescending(worker => worker.FullName).Select(worker => worker).ToList();
+                    }
+                    else if (chooseFilter == 4)
+                    {
+                        _workers = _workers.OrderByDescending(worker => worker.Age).Select(worker => worker).ToList();
+                    }
+                    else if (chooseFilter == 5)
+                    {
+                        _workers = _workers.OrderByDescending(worker => worker.Height).Select(worker => worker).ToList();
+                    }
+                    else if (chooseFilter == 6)
+                    {
+                        _workers = _workers.OrderByDescending(worker => worker.DateOfBirth).Select(worker => worker).ToList();
+                    }
+                    else if (chooseFilter == 7)
+                    {
+                        _workers = _workers.OrderByDescending(worker => worker.PlaceOfBirth).Select(worker => worker).ToList();
+                    }
+                }
             }
 
             public bool ChooseSortingMethod(string inputText, out int sortValue)
@@ -329,7 +467,7 @@ namespace SkillboxLessen7._8
 
             public Worker GetWorkerById(int index)
             {
-                foreach (Worker worker in workers)
+                foreach (Worker worker in _workers)
                 {
                     if (worker.Id == index)
                     {
@@ -343,11 +481,11 @@ namespace SkillboxLessen7._8
             public void DeleteWorker(int id)
             {
                 SaveWorkersDate();
-                for (int i = 0; i < workers.Count; i++)
+                for (int i = 0; i < _workers.Count; i++)
                 {
-                    if (workers[i].Id == id)
+                    if (_workers[i].Id == id)
                     {
-                        workers.Remove(workers[i]);
+                        _workers.Remove(_workers[i]);
                         WriteLine("Удаление прошло успешно");
                     }
                 }
@@ -364,7 +502,7 @@ namespace SkillboxLessen7._8
                 else
                 {
                     worker.Id = CheckMaxIdWorkerAtList() + 1;
-                    workers.Add(worker);
+                    _workers.Add(worker);
                     WriteWorkersDate();
                     Clear();
                     WriteLine(new string('_', 48) + "\n");
@@ -374,6 +512,7 @@ namespace SkillboxLessen7._8
                     WriteLine(new string('_', 48) + "\n");
                     worker.ShowInfo();
                     WriteLine(new string('_', 48) + "\n");
+                    ActiveNewSort(_chooseNumberFilter, _isForwardFilter);
                 }
             }
 
@@ -389,11 +528,11 @@ namespace SkillboxLessen7._8
                 IEnumerable<Worker> FiltersOfDate;
                 if (sortValue == 1)
                 {
-                    FiltersOfDate = from Worker work in workers where work.DateAndTimeCreate > dateFrom && work.DateAndTimeCreate < dateTo select work;
+                    FiltersOfDate = from Worker work in _workers where work.DateAndTimeCreate > dateFrom && work.DateAndTimeCreate < dateTo select work;
                 }
                 else
                 {
-                    FiltersOfDate = from Worker work in workers where work.DateOfBirth > dateFrom && work.DateOfBirth < dateTo select work;
+                    FiltersOfDate = from Worker work in _workers where work.DateOfBirth > dateFrom && work.DateOfBirth < dateTo select work;
                 }
                 return FiltersOfDate.ToArray();
             }
@@ -424,7 +563,7 @@ namespace SkillboxLessen7._8
             {
                 using (StreamWriter streamWriter = new StreamWriter(_pathFile))
                 {
-                    foreach (var worker in workers)
+                    foreach (var worker in _workers)
                     {
                         streamWriter.WriteLine($"{worker.Id}#{worker.DateAndTimeCreate}#{worker.FullName}" +
                             $"#{worker.Age}#{worker.Height}#{worker.DateOfBirth}#{worker.PlaceOfBirth}");
@@ -435,7 +574,7 @@ namespace SkillboxLessen7._8
             private void SaveWorkersDate()
             {
                 Worker newWorker;
-                workers.Clear();
+                _workers.Clear();
                 string[] strings = File.ReadAllLines(_pathFile);
                 for (int i = 0; i < strings.Length; i++)
                 {
@@ -446,12 +585,13 @@ namespace SkillboxLessen7._8
                     }
                     else
                     {
-                        newWorker.Id = workers.Count + 1;
-                        workers.Add(newWorker);
+                        newWorker.Id = _workers.Count + 1;
+                        _workers.Add(newWorker);
                     }
                 }
-                var filtersWorker = from work in workers orderby work.Id select work;
-                workers = filtersWorker.ToList();
+                var filtersWorker = from work in _workers orderby work.Id select work;
+                _workers = filtersWorker.ToList();
+                ActiveNewSort(_chooseNumberFilter, _isForwardFilter);
             }
 
             private Worker ContentDateRead(string[] employeeData)
@@ -542,13 +682,13 @@ namespace SkillboxLessen7._8
             private int CheckMaxIdWorkerAtList()
             {
                 int maxId = 0;
-                if (workers.Count > 0)
+                if (_workers.Count > 0)
                 {
-                    maxId = workers[0].Id;
-                    for (int i = 1; i < workers.Count; i++)
+                    maxId = _workers[0].Id;
+                    for (int i = 1; i < _workers.Count; i++)
                     {
-                        if (workers[i].Id > maxId)
-                            maxId = workers[i].Id;
+                        if (_workers[i].Id > maxId)
+                            maxId = _workers[i].Id;
                     }
                 }
                 return maxId;
