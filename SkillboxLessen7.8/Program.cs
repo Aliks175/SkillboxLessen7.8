@@ -21,7 +21,7 @@ namespace SkillboxLessen7._8
             {
                 WriteLine("Добрый день выберите один из следующих пунктов :\n");
                 WriteLine("1)Просмотр всех записей.\n2)Просмотр одной записи по индексу\n" +
-                    "3)Создание записи.\n4)Удаление записи.\n5)Загрузка записей в выбранном диапазоне дат.\n");
+                    "3)Создание записи.\n4)Удаление записи.\n5)Загрузка записей в выбранном диапазоне дат.\n6)Настроить сортировку данных");
                 Write("Введите номер желаемого пункта ");
                 inputText = ReadLine();
                 WriteLine("\n");
@@ -38,7 +38,7 @@ namespace SkillboxLessen7._8
                     case 1:
                         WriteLine("Список всех рабочих :\n ");
                         workers = repository.GetAllWorkers();
-
+                        workers = sortDate.SortWorkers(workers);
                         foreach (var worker in workers)
                             worker.ShowInfo();
                         break;
@@ -75,10 +75,10 @@ namespace SkillboxLessen7._8
                     case 4:
                         Clear();
                         WriteLine("Список всех рабочих :\n ");
-                        foreach (var worker in repository.GetAllWorkers())
-                        {
+                        workers = repository.GetAllWorkers();
+                        workers = sortDate.SortWorkers(workers);
+                        foreach (var worker in workers)
                             worker.ShowInfo();
-                        }
                         WriteLine("\n");
                         Write("Удалние работника.\nВведите индекс :");
                         inputText = ReadLine();
@@ -99,7 +99,7 @@ namespace SkillboxLessen7._8
                         break;
                     case 5:
                         Clear();
-                        if (repository.ChooseSortingMethod(inputText, out int sortValue)) { }
+                        if (repository.ChooseSortingMethod(out int sortValue)) { }
                         else
                         {
                             continue;
@@ -116,19 +116,18 @@ namespace SkillboxLessen7._8
                         else
                         {
                             workers = repository.GetWorkersBetweenTwoDates(dateFrom, dateTo, sortValue);
+                            workers = sortDate.SortWorkers(workers);
                             WriteLine("Все успешно ");
+                            WriteLine('\n');
                             foreach (var worker in workers)
                             {
-                                WriteLine('\n');
                                 WriteLine(new string('_', 48) + "\n");
                                 worker.ShowInfo();
                             }
                         }
                         break;
                     case 6:
-
-
-
+                        sortDate.SelectNewSort();
                         break;
                     default:
                         WriteLine("Данные не корректы");
@@ -138,66 +137,105 @@ namespace SkillboxLessen7._8
                 Clear();
             }
         }
+
         class SortDate
         {
             SortField _selectedFilter;
-            public enum SortField
 
+            public SortDate()
             {
+                _selectedFilter = SortField.Id;
+            }
 
-                ID,
+            public enum SortField
+            {
+                Id = 1,
 
-                Name,
+                DateAndTimeCreate,
+
+                FullName,
 
                 Age,
 
                 Height,
 
-                BirthDate,
+                DateOfBirth,
 
-                BirthPlace
-
+                PlaceOfBirth
             }
-
 
             public Worker[] SortWorkers(Worker[] workers)
             {
                 switch (_selectedFilter)
-
                 {
-                    case SortField.ID:
-
+                    case SortField.Id:
                         return workers.OrderBy(worker => worker.Id).ToArray();
-
-                    case SortField.Name:
-
+                    case SortField.FullName:
                         return workers.OrderBy(worker => worker.FullName).ToArray();
-
                     case SortField.Age:
-
                         return workers.OrderBy(worker => worker.Age).ToArray();
-
                     case SortField.Height:
-
                         return workers.OrderBy(worker => worker.Height).ToArray();
-
-                    case SortField.BirthDate:
-
+                    case SortField.DateOfBirth:
                         return workers.OrderBy(worker => worker.DateOfBirth).ToArray();
-
-                    case SortField.BirthPlace:
-
+                    case SortField.PlaceOfBirth:
                         return workers.OrderBy(worker => worker.PlaceOfBirth).ToArray();
-
                     default:
-
                         return workers;
-
                 }
             }
+
             public void SelectNewSort()
             {
-
+                bool isDataEntry = true;
+                while (isDataEntry)
+                {
+                    Clear();
+                    WriteLine("По какому критерию сортировать ");
+                    WriteLine("\n1)По Id \n2)По дате создания\n3)По имени\n4)по возросту\n" +
+                        "5)По росту\n6)По дате рождения\n7)По месту рождения ");
+                    Write("Ваш выбор :");
+                    if (int.TryParse(ReadLine(), out int numberChooseSort))
+                    {
+                        isDataEntry = false;
+                        switch (numberChooseSort)
+                        {
+                            case (int)SortField.Id:
+                                _selectedFilter = SortField.Id;
+                                break;
+                            case (int)SortField.DateAndTimeCreate:
+                                _selectedFilter = SortField.DateAndTimeCreate;
+                                break;
+                            case (int)SortField.FullName:
+                                _selectedFilter = SortField.FullName;
+                                break;
+                            case (int)SortField.Age:
+                                _selectedFilter = SortField.Age;
+                                break;
+                            case (int)SortField.Height:
+                                _selectedFilter = SortField.Height;
+                                break;
+                            case (int)SortField.DateOfBirth:
+                                _selectedFilter = SortField.DateOfBirth;
+                                break;
+                            case (int)SortField.PlaceOfBirth:
+                                _selectedFilter = SortField.PlaceOfBirth;
+                                break;
+                            default:
+                                isDataEntry = true;
+                                WriteLine($"Ошибка ({numberChooseSort}) такого параметра сортировки нет");
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        WriteLine("Ошибка, такого параметра сортировки нет");
+                        ReadLine();
+                        Clear();
+                        continue;
+                    }
+                    Write("\nФильтр сортировки установлен");
+                }
             }
         }
 
@@ -254,10 +292,11 @@ namespace SkillboxLessen7._8
                 return workers.ToArray();
             }
 
-            public bool ChooseSortingMethod(string inputText, out int sortValue)
+            public bool ChooseSortingMethod(out int sortValue)
             {
                 bool isDataEntry = true;
                 sortValue = 0;
+                string inputText;
                 while (isDataEntry)
                 {
                     WriteLine("По какой дате вы хотели бы сортировать");
@@ -622,8 +661,6 @@ namespace SkillboxLessen7._8
                 return maxId;
             }
         }
-
-
     }
 }
 
