@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Policy;
 using static System.Console;
 using File = System.IO.File;
 
@@ -13,6 +12,7 @@ namespace SkillboxLessen7._8
         static void Main(string[] args)
         {
             Repository repository = new Repository();
+            SortDate sortDate = new SortDate();
             Worker[] workers;
             bool isOpen = true;
             string inputText;
@@ -21,8 +21,7 @@ namespace SkillboxLessen7._8
             {
                 WriteLine("Добрый день выберите один из следующих пунктов :\n");
                 WriteLine("1)Просмотр всех записей.\n2)Просмотр одной записи по индексу\n" +
-                    "3)Создание записи.\n4)Удаление записи.\n5)Загрузка записей в выбранном диапазоне дат.\n" +
-                    "6)Выберите сортировку");
+                    "3)Создание записи.\n4)Удаление записи.\n5)Загрузка записей в выбранном диапазоне дат.\n6)Настроить сортировку данных");
                 Write("Введите номер желаемого пункта ");
                 inputText = ReadLine();
                 WriteLine("\n");
@@ -39,7 +38,7 @@ namespace SkillboxLessen7._8
                     case 1:
                         WriteLine("Список всех рабочих :\n ");
                         workers = repository.GetAllWorkers();
-
+                        workers = sortDate.SortWorkers(workers);
                         foreach (var worker in workers)
                             worker.ShowInfo();
                         break;
@@ -76,10 +75,10 @@ namespace SkillboxLessen7._8
                     case 4:
                         Clear();
                         WriteLine("Список всех рабочих :\n ");
-                        foreach (var worker in repository.GetAllWorkers())
-                        {
+                        workers = repository.GetAllWorkers();
+                        workers = sortDate.SortWorkers(workers);
+                        foreach (var worker in workers)
                             worker.ShowInfo();
-                        }
                         WriteLine("\n");
                         Write("Удалние работника.\nВведите индекс :");
                         inputText = ReadLine();
@@ -117,140 +116,18 @@ namespace SkillboxLessen7._8
                         else
                         {
                             workers = repository.GetWorkersBetweenTwoDates(dateFrom, dateTo, sortValue);
+                            workers = sortDate.SortWorkers(workers);
                             WriteLine("Все успешно ");
+                            WriteLine('\n');
                             foreach (var worker in workers)
                             {
-                                WriteLine('\n');
                                 WriteLine(new string('_', 48) + "\n");
                                 worker.ShowInfo();
                             }
                         }
                         break;
                     case 6:
-                        int _chooseNumberFilter = 1;
-                        bool _isForwardFilter=true;
-                        bool _isdataSuccessfullyCompleted=false;
-                        workers = repository.GetAllWorkers();
-                        bool isDataEntry = true;
-                        while (isDataEntry)
-                        {
-                            Clear();
-                            WriteLine("Введите новую сортеровку ");
-                            WriteLine("\n1)По возростанию\n2)По убыванию ");
-                            Write("Ваш выбор :");
-                            if (int.TryParse(ReadLine(), out int numberSort))
-                            {
-                                if (numberSort > 0 && numberSort < 3)
-                                    _isForwardFilter = numberSort == 1;
-                                else
-                                {
-                                    WriteLine("Ошибка нет ");
-                                    ReadLine();
-                                    Clear();
-                                    continue;
-                                }
-                            }
-                            else
-                            {
-                                WriteLine("Ошибка нет ");
-                                ReadLine();
-                                Clear();
-                                continue;
-                            }
-                            WriteLine("По какому критерию сортировать ");
-                            WriteLine("\n1)По Id \n2)По дате создания\n3)По имени\n4)по возросту\n" +
-                                "5)По росту\n6)По дате рождения\n7)По месту рождения ");
-                            Write("Ваш выбор :");
-                            if (int.TryParse(ReadLine(), out int numberChooseSort))
-                            {
-                                if (numberChooseSort > 0 && numberChooseSort < 8)
-                                {
-                                    _chooseNumberFilter = numberChooseSort;
-                                }
-                                else
-                                {
-                                    WriteLine("Ошибка нет ");
-                                    ReadLine();
-                                    Clear();
-                                    continue;
-                                }
-                            }
-                            else
-                            {
-                                WriteLine("Ошибка нет ");
-                                ReadLine();
-                                Clear();
-                                continue;
-                            }
-                            Write("\nФильтр сортировки установлен");
-                            isDataEntry = false;
-                            _isdataSuccessfullyCompleted = true;
-                        }
-                        if (_isdataSuccessfullyCompleted)
-                        {
-                            if (_isForwardFilter)
-                            {
-                                if (_chooseNumberFilter == 1)
-                                {
-                                    workers = workers.OrderBy(worker => worker.Id).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 2)
-                                {
-                                    workers = workers.OrderBy(worker => worker.DateAndTimeCreate).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 3)
-                                {
-                                    workers = workers.OrderBy(worker => worker.FullName).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 4)
-                                {
-                                     workers = workers.OrderBy(worker => worker.Age).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 5)
-                                {
-                                     workers = workers.OrderBy(worker => worker.Height).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 6)
-                                {
-                                    workers =  workers.OrderBy(worker => worker.DateOfBirth).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 7)
-                                {
-                                    workers =  workers.OrderBy(worker => worker.PlaceOfBirth).ToArray();
-                                }
-                            }
-                            else
-                            {
-                                if (_chooseNumberFilter == 1)
-                                {
-                                    workers = workers.OrderByDescending(worker => worker.Id).Select(worker => worker).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 2)
-                                {
-                                    workers = workers.OrderByDescending(worker => worker.DateAndTimeCreate).Select(worker => worker).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 3)
-                                {
-                                    workers = workers.OrderByDescending(worker => worker.FullName).Select(worker => worker).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 4)
-                                {
-                                    workers = workers.OrderByDescending(worker => worker.Age).Select(worker => worker).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 5)
-                                {
-                                    workers = workers.OrderByDescending(worker => worker.Height).Select(worker => worker).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 6)
-                                {
-                                    workers = workers.OrderByDescending(worker => worker.DateOfBirth).Select(worker => worker).ToArray();
-                                }
-                                else if (_chooseNumberFilter == 7)
-                                {
-                                    workers = workers.OrderByDescending(worker => worker.PlaceOfBirth).Select(worker => worker).ToArray();
-                                }
-                            }
-                        }
+                        sortDate.SelectNewSort();
                         break;
                     default:
                         WriteLine("Данные не корректы");
@@ -258,6 +135,107 @@ namespace SkillboxLessen7._8
                 }
                 ReadLine();
                 Clear();
+            }
+        }
+
+        class SortDate
+        {
+            SortField _selectedFilter;
+
+            public SortDate()
+            {
+                _selectedFilter = SortField.Id;
+            }
+
+            public enum SortField
+            {
+                Id = 1,
+
+                DateAndTimeCreate,
+
+                FullName,
+
+                Age,
+
+                Height,
+
+                DateOfBirth,
+
+                PlaceOfBirth
+            }
+
+            public Worker[] SortWorkers(Worker[] workers)
+            {
+                switch (_selectedFilter)
+                {
+                    case SortField.Id:
+                        return workers.OrderBy(worker => worker.Id).ToArray();
+                    case SortField.FullName:
+                        return workers.OrderBy(worker => worker.FullName).ToArray();
+                    case SortField.Age:
+                        return workers.OrderBy(worker => worker.Age).ToArray();
+                    case SortField.Height:
+                        return workers.OrderBy(worker => worker.Height).ToArray();
+                    case SortField.DateOfBirth:
+                        return workers.OrderBy(worker => worker.DateOfBirth).ToArray();
+                    case SortField.PlaceOfBirth:
+                        return workers.OrderBy(worker => worker.PlaceOfBirth).ToArray();
+                    default:
+                        return workers;
+                }
+            }
+
+            public void SelectNewSort()
+            {
+                bool isDataEntry = true;
+                while (isDataEntry)
+                {
+                    Clear();
+                    WriteLine("По какому критерию сортировать ");
+                    WriteLine("\n1)По Id \n2)По дате создания\n3)По имени\n4)по возросту\n" +
+                        "5)По росту\n6)По дате рождения\n7)По месту рождения ");
+                    Write("Ваш выбор :");
+                    if (int.TryParse(ReadLine(), out int numberChooseSort))
+                    {
+                        isDataEntry = false;
+                        switch (numberChooseSort)
+                        {
+                            case (int)SortField.Id:
+                                _selectedFilter = SortField.Id;
+                                break;
+                            case (int)SortField.DateAndTimeCreate:
+                                _selectedFilter = SortField.DateAndTimeCreate;
+                                break;
+                            case (int)SortField.FullName:
+                                _selectedFilter = SortField.FullName;
+                                break;
+                            case (int)SortField.Age:
+                                _selectedFilter = SortField.Age;
+                                break;
+                            case (int)SortField.Height:
+                                _selectedFilter = SortField.Height;
+                                break;
+                            case (int)SortField.DateOfBirth:
+                                _selectedFilter = SortField.DateOfBirth;
+                                break;
+                            case (int)SortField.PlaceOfBirth:
+                                _selectedFilter = SortField.PlaceOfBirth;
+                                break;
+                            default:
+                                isDataEntry = true;
+                                WriteLine($"Ошибка ({numberChooseSort}) такого параметра сортировки нет");
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        WriteLine("Ошибка, такого параметра сортировки нет");
+                        ReadLine();
+                        Clear();
+                        continue;
+                    }
+                    Write("\nФильтр сортировки установлен");
+                }
             }
         }
 
@@ -291,7 +269,7 @@ namespace SkillboxLessen7._8
         class Repository
         {
             private string _pathFile = @"PersonalAffairsForEmployees.txt";
-            private List<Worker> _workers = new List<Worker>();
+            List<Worker> workers = new List<Worker>();
 
             public Repository()
             {
@@ -311,20 +289,21 @@ namespace SkillboxLessen7._8
             public Worker[] GetAllWorkers()
             {
                 SaveWorkersDate();
-                return _workers.ToArray();
+                return workers.ToArray();
             }
 
             public bool ChooseSortingMethod(out int sortValue)
             {
                 bool isDataEntry = true;
                 sortValue = 0;
+                string inputText;
                 while (isDataEntry)
                 {
                     WriteLine("По какой дате вы хотели бы сортировать");
                     WriteLine("1) Create - дате создания");
                     WriteLine("2) Birth - дате рождения");
                     Write("Введите желаемую сортеровку :");
-                   string inputText = ReadLine();
+                    inputText = ReadLine();
                     WriteLine("\n");
                     if (int.TryParse(inputText, out int inputSortValue))
                     {
@@ -457,7 +436,7 @@ namespace SkillboxLessen7._8
 
             public Worker GetWorkerById(int index)
             {
-                foreach (Worker worker in _workers)
+                foreach (Worker worker in workers)
                 {
                     if (worker.Id == index)
                     {
@@ -471,11 +450,11 @@ namespace SkillboxLessen7._8
             public void DeleteWorker(int id)
             {
                 SaveWorkersDate();
-                for (int i = 0; i < _workers.Count; i++)
+                for (int i = 0; i < workers.Count; i++)
                 {
-                    if (_workers[i].Id == id)
+                    if (workers[i].Id == id)
                     {
-                        _workers.Remove(_workers[i]);
+                        workers.Remove(workers[i]);
                         WriteLine("Удаление прошло успешно");
                     }
                 }
@@ -492,7 +471,7 @@ namespace SkillboxLessen7._8
                 else
                 {
                     worker.Id = CheckMaxIdWorkerAtList() + 1;
-                    _workers.Add(worker);
+                    workers.Add(worker);
                     WriteWorkersDate();
                     Clear();
                     WriteLine(new string('_', 48) + "\n");
@@ -517,11 +496,11 @@ namespace SkillboxLessen7._8
                 IEnumerable<Worker> FiltersOfDate;
                 if (sortValue == 1)
                 {
-                    FiltersOfDate = from Worker work in _workers where work.DateAndTimeCreate > dateFrom && work.DateAndTimeCreate < dateTo select work;
+                    FiltersOfDate = from Worker work in workers where work.DateAndTimeCreate > dateFrom && work.DateAndTimeCreate < dateTo select work;
                 }
                 else
                 {
-                    FiltersOfDate = from Worker work in _workers where work.DateOfBirth > dateFrom && work.DateOfBirth < dateTo select work;
+                    FiltersOfDate = from Worker work in workers where work.DateOfBirth > dateFrom && work.DateOfBirth < dateTo select work;
                 }
                 return FiltersOfDate.ToArray();
             }
@@ -552,7 +531,7 @@ namespace SkillboxLessen7._8
             {
                 using (StreamWriter streamWriter = new StreamWriter(_pathFile))
                 {
-                    foreach (var worker in _workers)
+                    foreach (var worker in workers)
                     {
                         streamWriter.WriteLine($"{worker.Id}#{worker.DateAndTimeCreate}#{worker.FullName}" +
                             $"#{worker.Age}#{worker.Height}#{worker.DateOfBirth}#{worker.PlaceOfBirth}");
@@ -563,7 +542,7 @@ namespace SkillboxLessen7._8
             private void SaveWorkersDate()
             {
                 Worker newWorker;
-                _workers.Clear();
+                workers.Clear();
                 string[] strings = File.ReadAllLines(_pathFile);
                 for (int i = 0; i < strings.Length; i++)
                 {
@@ -574,12 +553,12 @@ namespace SkillboxLessen7._8
                     }
                     else
                     {
-                        newWorker.Id = _workers.Count + 1;
-                        _workers.Add(newWorker);
+                        newWorker.Id = workers.Count + 1;
+                        workers.Add(newWorker);
                     }
                 }
-                var filtersWorker = from work in _workers orderby work.Id select work;
-                _workers = filtersWorker.ToList();
+                var filtersWorker = from work in workers orderby work.Id select work;
+                workers = filtersWorker.ToList();
             }
 
             private Worker ContentDateRead(string[] employeeData)
@@ -602,38 +581,60 @@ namespace SkillboxLessen7._8
             private Worker ContentVerification(string[] employeeData)
             {
                 bool isNotError = true;
-                if (int.TryParse(employeeData[0], out int id)){}
+                int _id;
+                DateTime _dateAndTimeCreate;
+                string _fullName;
+                int _age;
+                double _height;
+                DateTime _dateOfBirth;
+                string _placeOfBirth;
+                if (int.TryParse(employeeData[0], out int id))
+                {
+                    _id = id;
+                }
                 else
                 {
                     isNotError = false;
                     WriteLine("При чтении допущена ошибка в блоке ID Не верный");
                 }
-                if (DateTime.TryParse(employeeData[1], out DateTime dateAndTimeCreate)){}
+                if (DateTime.TryParse(employeeData[1], out DateTime dateAndTimeCreate))
+                {
+                    _dateAndTimeCreate = dateAndTimeCreate;
+                }
                 else
                 {
                     isNotError = false;
                     WriteLine("При чтении допущена ошибка в блоке время добовления записи");
                 }
-               string _fullName = employeeData[2];
-                if (int.TryParse(employeeData[3], out int age)){}
+                _fullName = employeeData[2];
+                if (int.TryParse(employeeData[3], out int age))
+                {
+                    _age = age;
+                }
                 else
                 {
                     isNotError = false;
                     WriteLine("При чтении допущена ошибка в блоке Возраст");
                 }
-                if (double.TryParse(employeeData[4], out double height)){}
+                if (double.TryParse(employeeData[4], out double height))
+                {
+                    _height = height;
+                }
                 else
                 {
                     isNotError = false;
                     WriteLine("При чтении допущена ошибка в блоке Рост");
                 }
-                if (DateTime.TryParse(employeeData[5], out DateTime dateOfBirth)){}
+                if (DateTime.TryParse(employeeData[5], out DateTime dateOfBirth))
+                {
+                    _dateOfBirth = dateOfBirth;
+                }
                 else
                 {
                     isNotError = false;
                     WriteLine("При чтении допущена ошибка в блоке день рождения");
                 }
-               string _placeOfBirth = employeeData[6];
+                _placeOfBirth = employeeData[6];
                 if (isNotError)
                 {
                     return new Worker(dateAndTimeCreate, _fullName, age, height, dateOfBirth, _placeOfBirth);
@@ -648,13 +649,13 @@ namespace SkillboxLessen7._8
             private int CheckMaxIdWorkerAtList()
             {
                 int maxId = 0;
-                if (_workers.Count > 0)
+                if (workers.Count > 0)
                 {
-                    maxId = _workers[0].Id;
-                    for (int i = 1; i < _workers.Count; i++)
+                    maxId = workers[0].Id;
+                    for (int i = 1; i < workers.Count; i++)
                     {
-                        if (_workers[i].Id > maxId)
-                            maxId = _workers[i].Id;
+                        if (workers[i].Id > maxId)
+                            maxId = workers[i].Id;
                     }
                 }
                 return maxId;
