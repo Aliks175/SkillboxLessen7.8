@@ -12,6 +12,7 @@ namespace SkillboxLessen7._8
         static void Main(string[] args)
         {
             Repository repository = new Repository();
+            SortDate sortDate = new SortDate();
             Worker[] workers;
             bool isOpen = true;
             string inputText;
@@ -124,12 +125,79 @@ namespace SkillboxLessen7._8
                             }
                         }
                         break;
+                    case 6:
+
+
+
+                        break;
                     default:
                         WriteLine("Данные не корректы");
                         break;
                 }
                 ReadLine();
                 Clear();
+            }
+        }
+        class SortDate
+        {
+            SortField _selectedFilter;
+            public enum SortField
+
+            {
+
+                ID,
+
+                Name,
+
+                Age,
+
+                Height,
+
+                BirthDate,
+
+                BirthPlace
+
+            }
+
+
+            public Worker[] SortWorkers(Worker[] workers)
+            {
+                switch (_selectedFilter)
+
+                {
+                    case SortField.ID:
+
+                        return workers.OrderBy(worker => worker.Id).ToArray();
+
+                    case SortField.Name:
+
+                        return workers.OrderBy(worker => worker.FullName).ToArray();
+
+                    case SortField.Age:
+
+                        return workers.OrderBy(worker => worker.Age).ToArray();
+
+                    case SortField.Height:
+
+                        return workers.OrderBy(worker => worker.Height).ToArray();
+
+                    case SortField.BirthDate:
+
+                        return workers.OrderBy(worker => worker.DateOfBirth).ToArray();
+
+                    case SortField.BirthPlace:
+
+                        return workers.OrderBy(worker => worker.PlaceOfBirth).ToArray();
+
+                    default:
+
+                        return workers;
+
+                }
+            }
+            public void SelectNewSort()
+            {
+
             }
         }
 
@@ -554,6 +622,8 @@ namespace SkillboxLessen7._8
                 return maxId;
             }
         }
+
+
     }
 }
 
